@@ -1,3 +1,5 @@
+package com.cloud.server;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -6,17 +8,22 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class PortListener implements Runnable {
+    private final Logger logger = Server.logger;
+
     private final int PORT;
     private final String IP_ADDRESS;
     private final int BUFFER_SIZE;
 
     private final Map<SocketChannel, User> socketUser = new HashMap<>();
+    private final Map<SocketChannel, byte[]> messageForSend = new HashMap<>();
 
     private final ExecutorService service = Executors.newCachedThreadPool();
 
@@ -40,23 +47,48 @@ public class PortListener implements Runnable {
 
             while (serverSocketChannel.isOpen()) {
                 selector.select();
+                logger.info("bla");
                 Set<SelectionKey> keys = selector.selectedKeys();
                 for (SelectionKey key : keys) {
                     if (key.isValid()) {
                         if (key.isAcceptable()) {
-                            SocketChannel socketChannel = serverSocketChannel.accept();
-                            socketChannel.configureBlocking(false);
-                            socketChannel.register(selector, SelectionKey.OP_READ, ByteBuffer.allocate(BUFFER_SIZE));
-                            socketUser.put(socketChannel, new User());
+                            SocketChannel socketChannel = ((ServerSocketChannel) key.channel()).accept();
+                            if (socketChannel != null) {
+                                logger.info("Accept client: " + socketChannel.getRemoteAddress());
+                                socketChannel.configureBlocking(false);
+                                socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
+                                        ByteBuffer.allocate(BUFFER_SIZE));
+                                socketUser.put(socketChannel, new User(this, socketChannel));
+                            }
                         } else if (key.isReadable()) {
                             handler(key);
+                        } else if (key.isWritable()) {
+                            SocketChannel socketChannel = (SocketChannel) key.channel();
+                            if (messageForSend.get(socketChannel) != null) {
+                                write((ByteBuffer) key.attachment(), socketChannel);
+                            }
                         }
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                selector.close();
+                serverSocketChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public Map<SocketChannel, User> getSocketUser() {
+        return socketUser;
+    }
+
+    public synchronized Map<SocketChannel, byte[]> getMessageForSend() {
+        return messageForSend;
     }
 
     /**
@@ -65,8 +97,9 @@ public class PortListener implements Runnable {
      */
     private void handler(SelectionKey key) {
         try {
-            service.execute(new ProcessingMessages(
-                    socketUser.get((SocketChannel) key.channel()),//get user from Map
+            SocketChannel socketChannel = (SocketChannel) key.channel();
+            logger.info("handler from: " + socketChannel.getRemoteAddress());
+            service.execute(new ProcessingMessages(socketUser.get(socketChannel),//get user from Map
                     read(key)));//get message
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,7 +107,7 @@ public class PortListener implements Runnable {
     }
 
     /**
-     * Pick the message up from channel
+     * Pick a message up from channel
      * @param key - token of chanel
      * @return - String of message
      * @throws IOException
@@ -100,6 +133,43 @@ public class PortListener implements Runnable {
 
             message = stringBuilder.toString();
         }
+        logger.info("!!!!!!!!" + message);
         return message;
+    }
+
+    /**
+     *
+     * @param buf
+     * @param socketChannel
+     * @throws IOException
+     */
+    private void  write(ByteBuffer buf, SocketChannel socketChannel) throws IOException {
+        byte[] data = messageForSend.remove(socketChannel);
+
+        if (data == null) {
+            return;
+        }
+
+        int i = 0;
+        buf.clear();
+
+        while (i < data.length) {
+
+            while (buf.hasRemaining() && i < data.length) {
+                buf.put(data[i]);
+                i++;
+            }
+            buf.flip();
+            while (buf.hasRemaining()) {
+                try {
+                    socketChannel.write(buf);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            buf.compact();
+        }
+
+        logger.info("message was sent to the client: " + socketChannel.getRemoteAddress() ) ;
     }
 }
