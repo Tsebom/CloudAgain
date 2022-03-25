@@ -46,8 +46,7 @@ public class PortListener implements Runnable {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
             while (serverSocketChannel.isOpen()) {
-                selector.select();
-                logger.info("bla");
+                selector.select(1000);
                 Set<SelectionKey> keys = selector.selectedKeys();
                 for (SelectionKey key : keys) {
                     if (key.isValid()) {
@@ -56,16 +55,18 @@ public class PortListener implements Runnable {
                             if (socketChannel != null) {
                                 logger.info("Accept client: " + socketChannel.getRemoteAddress());
                                 socketChannel.configureBlocking(false);
-                                socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
+                                socketChannel.register(selector, SelectionKey.OP_READ,
                                         ByteBuffer.allocate(BUFFER_SIZE));
                                 socketUser.put(socketChannel, new User(this, socketChannel));
                             }
                         } else if (key.isReadable()) {
                             handler(key);
-                        } else if (key.isWritable()) {
+                            key.interestOps(SelectionKey.OP_WRITE);
+                        } else if (key.isWritable() || !messageForSend.isEmpty()) {
                             SocketChannel socketChannel = (SocketChannel) key.channel();
                             if (messageForSend.get(socketChannel) != null) {
                                 write((ByteBuffer) key.attachment(), socketChannel);
+                                key.interestOps(SelectionKey.OP_READ);
                             }
                         }
                     }
