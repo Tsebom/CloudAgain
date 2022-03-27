@@ -364,21 +364,14 @@ public class ProcessingMessages implements Runnable{
      * Implementing a request disconnect client
      */
     private void breakConnect() {
-        User user = portListener.getSocketUsers().remove(socketChanel);
+        portListener.getSocketUsers().remove(socketChanel);
         serializeData("disconnect");
-        while (portListener.getMessageForSend().get(socketChanel) != null) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 
     /**
      * Authorization user
-     * @param command
+     * @param command -
      */
     private void authorization(String command) {
         String[] token = command.split(" ");
@@ -397,9 +390,9 @@ public class ProcessingMessages implements Runnable{
     }
 
     /**
-     *
-     * @param command
-     * @throws IOException
+     * Write down registration information to the data base
+     * @param command -
+     * @throws IOException -
      */
     private void registration(String command) throws IOException {
         String[] token = command.split(" ");
@@ -441,7 +434,7 @@ public class ProcessingMessages implements Runnable{
     }
 
     /**
-     *
+     * Put message in the Map for sending to a client
      * @param bytes - byte array of data
      */
     private void sendMessage(byte[] bytes) {
@@ -540,12 +533,10 @@ public class ProcessingMessages implements Runnable{
                 }).start();
 
                 while(downloadPort == 0) {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 }
                 serializeData("ready_for_get_file " + downloadPort);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
         }
@@ -556,7 +547,7 @@ public class ProcessingMessages implements Runnable{
      * @param pathFile - the path to file where data writing from channel
      * @param socket -
      * @param sizeFile - the size of file
-     * @throws IOException
+     * @throws IOException -
      */
     private void readFile(Path pathFile, Socket socket, long sizeFile) throws IOException {
         logger.info("start download file");

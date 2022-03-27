@@ -13,14 +13,19 @@ public class Server {
 
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
 
+    DataBaseConnect dataBaseConnect;
+
     public Server() {
         try {
             logmanager.readConfiguration(new FileInputStream("../Server/src/main/resources/logging.properties"));
 
-            DataBaseConnect.getDataBaseConnection();
+            dataBaseConnect = DataBaseConnect.getDataBaseConnection();
 
             service.execute(new PortListener(5679, "localhost", 1460));
         } catch (IOException e) {
+            if (dataBaseConnect != null) {
+                dataBaseConnect.disconnectDataBase();
+            }
             e.printStackTrace();
         }
     }

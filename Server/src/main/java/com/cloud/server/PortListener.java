@@ -43,7 +43,6 @@ public class PortListener implements Runnable {
             serverSocketChannel.socket().bind(new InetSocketAddress(IP_ADDRESS, PORT));
             serverSocketChannel.configureBlocking(false);
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-
             while (serverSocketChannel.isOpen()) {
                 selector.select();
                 Set<SelectionKey> keys = selector.selectedKeys();
@@ -142,15 +141,14 @@ public class PortListener implements Runnable {
 
             message = stringBuilder.toString();
         }
-        logger.info("!!!!!!!!" + message);
         return message;
     }
 
     /**
-     *
-     * @param buf
-     * @param socketChannel
-     * @throws IOException
+     * Write byte data to a socket
+     * @param buf - buffer
+     * @param socketChannel - socket
+     * @throws IOException -
      */
     private void  write(ByteBuffer buf, SocketChannel socketChannel) throws IOException {
         byte[] data = messageForSend.remove(socketChannel);

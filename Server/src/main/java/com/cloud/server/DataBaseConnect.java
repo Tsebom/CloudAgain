@@ -39,8 +39,6 @@ public class DataBaseConnect {
 
     /**
      * Set connect to RegBase
-     * @throws ClassNotFoundException
-     * @throws SQLException
      */
     private void connectDataBase(){
         try {

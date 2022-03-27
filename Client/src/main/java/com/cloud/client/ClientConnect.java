@@ -129,7 +129,7 @@ public class ClientConnect implements Runnable{
 
     /**
      * Reading messages from server
-     * @param key -
+     * @param key - token of chanel
      */
     public void read(SelectionKey key) {
         logger.info("the start reading data from the channel: " + serverAddress);

@@ -117,7 +117,7 @@ public class ClientController implements Initializable {
 
     /**
      * Implementing action of exit from app
-     * @param actionEvent -
+     * @param actionEvent - click to button close
      */
     public void exitAction(ActionEvent actionEvent) {
         if (connect == null) {
@@ -128,7 +128,7 @@ public class ClientController implements Initializable {
 
     /**
      * Moving back through directories
-     * @param actionEvent -
+     * @param actionEvent - click to button Up
      */
     public void toParentPathAction(ActionEvent actionEvent) {
         Path parent = Paths.get(pathField.getText()).getParent();
@@ -139,7 +139,7 @@ public class ClientController implements Initializable {
 
     /**
      * Selection part of hard-disk
-     * @param actionEvent -
+     * @param actionEvent - choosing a disk
      */
     public void selectDisk(ActionEvent actionEvent) {
         ComboBox<String> disk = (ComboBox<String>) actionEvent.getSource();
@@ -148,7 +148,7 @@ public class ClientController implements Initializable {
 
     /**
      * Selection files or directories from list representing in the client part of window
-     * @param mouseEvent -
+     * @param mouseEvent - clicking to line of table of files corresponding a file or a directory
      */
     public void selectDirectoryOrFile(MouseEvent mouseEvent) {
         FileInfo fileInfo = (FileInfo)fileTable.getSelectionModel().getSelectedItem();
@@ -169,7 +169,7 @@ public class ClientController implements Initializable {
 
     /**
      * Set selected a file or directory like source for copy
-     * @param actionEvent -
+     * @param actionEvent - click to button Copy
      */
     public void copyFileOrDir(ActionEvent actionEvent) {
         if (selected != null) {
@@ -183,7 +183,7 @@ public class ClientController implements Initializable {
 
     /**
      * Set selected a file or directory like source for cut
-     * @param actionEvent -
+     * @param actionEvent - click to button Cut
      */
     public void cutFileOrDir(ActionEvent actionEvent) {
         if (selected != null) {
@@ -196,8 +196,8 @@ public class ClientController implements Initializable {
     }
 
     /**
-     * Starting process of copy or cut if appropriate process was selected
-     * @param actionEvent -
+     * Commence process of copy or cut if appropriate process was selected
+     * @param actionEvent - click to button Past
      */
     public void pasteFileOrDir(ActionEvent actionEvent) {
         Path path = Paths.get(pathField.getText());
@@ -290,7 +290,7 @@ public class ClientController implements Initializable {
 
     /**
      * Set selected a file or directory for delete
-     * @param actionEvent -
+     * @param actionEvent - click to button Delete
      */
     public void deleteCommand(ActionEvent actionEvent) {
         if (selected != null) {
@@ -363,7 +363,7 @@ public class ClientController implements Initializable {
 
     /**
      * Renaming selected file or directory
-     * @param actionEvent -
+     * @param actionEvent - click to button Rename
      */
     public void renameFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -384,8 +384,8 @@ public class ClientController implements Initializable {
     }
 
     /**
-     *  Creating new folder or file inside current directory
-     * @param actionEvent -
+     * Creating new folder or file inside current directory on the client side
+     * @param actionEvent - click to button +
      */
     public void createNewFolderOrFile(ActionEvent actionEvent) {
         String name = JOptionPane.showInputDialog("Type a name folder");
@@ -417,7 +417,7 @@ public class ClientController implements Initializable {
 
     /**
      * Upload file to the server
-     * @param actionEvent -
+     * @param actionEvent - click to button <
      */
     public void uploadFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -437,7 +437,7 @@ public class ClientController implements Initializable {
 
     /**
      * Download file from the server
-     * @param actionEvent -
+     * @param actionEvent - click to button >
      */
     public void downloadFile(ActionEvent actionEvent) {
         if (connect == null) {

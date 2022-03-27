@@ -18,7 +18,7 @@ public class User {
 
     private String name;
 
-    private Path root;
+    private final Path root;
     private Path currentPath;
     private Path selectFileForCopy;
     private Path selectFileForCut;
@@ -45,10 +45,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setRoot(Path root) {
-        this.root = root;
     }
 
     public void setStorageMessage(String storageMessage) {

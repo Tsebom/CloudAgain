@@ -129,8 +129,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent
+     * Open registration form
+     * @param actionEvent - click to button Sign up
      */
     public void signUp(ActionEvent actionEvent) {
         regOrAuth(isTryRegistration);
@@ -138,8 +138,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent -
+     * Commence process of registration and open connection with server
+     * @param actionEvent - click to button Registration
      */
     public void registration(ActionEvent actionEvent) {
         connect = ClientConnect.getInstance();
@@ -150,8 +150,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent
+     * Commence process of authorization
+     * @param actionEvent - click to button Sign in
      */
     public void signIn(ActionEvent actionEvent) {
         connect = ClientConnect.getInstance();
@@ -162,8 +162,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param title
+     *  Set title for window
+     * @param title - title
      */
     public void setTitle(String title) {
         Platform.runLater(() -> {
@@ -172,8 +172,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param list
+     *  Display list file from server
+     * @param list - list of file
      */
     public void updateFileTable(List<FileInfo> list) {
         listFile = list;
@@ -183,8 +183,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent
+     * Creating new folder or file inside current directory on the server side
+     * @param actionEvent - click to button +
      */
     public void createNewFolderOrFile(ActionEvent actionEvent) {
         String name = JOptionPane.showInputDialog("Type the name folder");
@@ -199,8 +199,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param mouseEvent -
+     * Selection files or directories from list representing in the server part of window
+     * @param mouseEvent - clicking to line of table of files corresponding a file or a directory
      */
     public void selectDirectory(MouseEvent mouseEvent) {
         FileInfo fileInfo= (FileInfo)fileTable.getSelectionModel().getSelectedItem();
@@ -220,7 +220,7 @@ public class ServerController implements Initializable {
 
     /**
      * Move to a parent directory
-     * @param actionEvent -
+     * @param actionEvent - click to button Up
      */
     public void toParentPathAction(ActionEvent actionEvent) {
         connect.getQueue().add("moveBack");
@@ -228,7 +228,7 @@ public class ServerController implements Initializable {
 
     /**
      * Delete a file on the server side
-     * @param actionEvent -
+     * @param actionEvent - click to button delete
      */
     public void deleteFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -248,7 +248,7 @@ public class ServerController implements Initializable {
 
     /**
      * Rename a file on the server side
-     * @param actionEvent -
+     * @param actionEvent - click to button Rename
      */
     public void renameFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -270,8 +270,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent -
+     * Set selected a file or directory like source for copy
+     * @param actionEvent - click to button Copy
      */
     public void copyFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -284,16 +284,16 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param actionEvent -
+     * Commence process of copy or cut if appropriate process was selected
+     * @param actionEvent - click to button Paste
      */
     public void pasteFile(ActionEvent actionEvent) {
         connect.getQueue().add("past");
     }
 
     /**
-     *
-     * @param actionEvent -
+     * Set selected a file or directory like source for cut
+     * @param actionEvent - click to button Cut
      */
     public void cutFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -306,8 +306,8 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param isRegistration
+     * Turn to registration form
+     * @param isRegistration -
      */
     protected void switchServerWindow(boolean isRegistration) {
         auth_box.setVisible(!isRegistration);
@@ -319,7 +319,7 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param isTryRegistration
+     * @param isTryRegistration -
      */
     private void regOrAuth (boolean isTryRegistration) {
         sign_in.setVisible(isTryRegistration);
@@ -334,9 +334,9 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *
-     * @param nameFile -
-     * @return -
+     * Check existing a file
+     * @param nameFile - a name file
+     * @return - true if file exist false if not
      */
     private boolean isNameFile(String nameFile) {
         for (FileInfo f : listFile) {

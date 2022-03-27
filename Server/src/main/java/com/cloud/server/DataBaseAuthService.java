@@ -73,7 +73,7 @@ public class DataBaseAuthService implements AuthService {
     /**
      * Set a query for adding
      * @return An object that represents a precompiled SQL statement
-     * @throws SQLException
+     * @throws SQLException -
      */
     private PreparedStatement setAllPrepareStatement() throws SQLException {
         return connection.prepareStatement("INSERT INTO UsersOFAuthorization (login, password, nickname) " +
