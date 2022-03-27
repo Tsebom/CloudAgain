@@ -32,10 +32,6 @@ public class ServerController implements Initializable {
 
     List<FileInfo> listFile;
     private String selected;
-    private String selectedFileForCopy;
-    private String selectedFileForCut;
-    private String selectedFileForRename;
-    private String selectedFileForDelete;
 
     @FXML
     public TextField pathField;
@@ -236,17 +232,14 @@ public class ServerController implements Initializable {
      */
     public void deleteFile(ActionEvent actionEvent) {
         if (selected != null) {
-            selectedFileForDelete = selected;
-            selected = null;
-
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                    "You are going to delete " + selectedFileForDelete + " from server! You are sure?",
+                    "You are going to delete " + selected + " from server! You are sure?",
                     ButtonType.YES, ButtonType.NO);
             Optional<ButtonType> option = alert.showAndWait();
             if (option.get() == ButtonType.YES) {
-                connect.getQueue().add("delete ".concat(selectedFileForDelete));
+                connect.getQueue().add("delete ".concat(selected));
             }
-            selectedFileForDelete = null;
+            selected = null;
         } else {
             Platform.runLater(() -> ClientController.
                     alertWarning("No one file was selected"));
@@ -259,9 +252,6 @@ public class ServerController implements Initializable {
      */
     public void renameFile(ActionEvent actionEvent) {
         if (selected != null) {
-            selectedFileForRename = selected;
-            selected = null;
-
             String rename = JOptionPane.showInputDialog("Type the new name");
             if (rename != null && !rename.equals("")) {
                 if (isNameFile(rename)) {
@@ -269,10 +259,10 @@ public class ServerController implements Initializable {
                             "The file's name already exist!", ButtonType.CANCEL);
                     alert.showAndWait();
                 } else {
-                    connect.getQueue().add("rename ".concat(selectedFileForRename + " " +rename));
+                    connect.getQueue().add("rename ".concat(selected + " " +rename));
                 }
             }
-            selectedFileForRename = null;
+            selected = null;
         } else {
             Platform.runLater(() -> ClientController.
                     alertWarning("No one file was selected"));
@@ -285,11 +275,8 @@ public class ServerController implements Initializable {
      */
     public void copyFile(ActionEvent actionEvent) {
         if (selected != null) {
-            selectedFileForCopy = selected;
+            connect.getQueue().add("copy ".concat(selected));
             selected = null;
-
-            connect.getQueue().add("copy ".concat(selectedFileForCopy));
-            selectedFileForCopy = null;
         } else {
             Platform.runLater(() -> ClientController.
                     alertWarning("No one file was selected"));
@@ -310,11 +297,8 @@ public class ServerController implements Initializable {
      */
     public void cutFile(ActionEvent actionEvent) {
         if (selected != null) {
-            selectedFileForCut = selected;
+            connect.getQueue().add("cut ".concat(selected));
             selected = null;
-
-            connect.getQueue().add("cut ".concat(selectedFileForCut));
-            selectedFileForCut = null;
         } else {
             Platform.runLater(() -> ClientController.
                     alertWarning("No one file was selected"));

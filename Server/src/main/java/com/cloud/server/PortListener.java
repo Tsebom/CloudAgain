@@ -8,7 +8,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -60,8 +59,8 @@ public class PortListener implements Runnable {
                                 socketUser.put(socketChannel, new User(this, socketChannel));
                             }
                         } else if (key.isReadable()) {
-                            handler(key);
                             key.interestOps(SelectionKey.OP_WRITE);
+                            handler(key);
                         } else if (key.isWritable() || !messageForSend.isEmpty()) {
                             SocketChannel socketChannel = (SocketChannel) key.channel();
                             if (messageForSend.get(socketChannel) != null) {
@@ -84,7 +83,7 @@ public class PortListener implements Runnable {
         }
     }
 
-    public Map<SocketChannel, User> getSocketUser() {
+    public Map<SocketChannel, User> getSocketUsers() {
         return socketUser;
     }
 
@@ -104,8 +103,13 @@ public class PortListener implements Runnable {
         try {
             SocketChannel socketChannel = (SocketChannel) key.channel();
             logger.info("handler from: " + socketChannel.getRemoteAddress());
-            service.execute(new ProcessingMessages(socketUser.get(socketChannel),//get user from Map
-                    read(key)));//get message
+            if (socketUser.containsKey(socketChannel)) {
+                service.execute(new ProcessingMessages(socketUser.get(socketChannel),//get user from Map
+                        read(key)));//get message
+            } else {
+                key.cancel();
+                socketChannel.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,7 +119,7 @@ public class PortListener implements Runnable {
      * Pick a message up from channel
      * @param key - token of chanel
      * @return - String of message
-     * @throws IOException
+     * @throws IOException -
      */
     private String read (SelectionKey key) throws IOException {
         String message = null;

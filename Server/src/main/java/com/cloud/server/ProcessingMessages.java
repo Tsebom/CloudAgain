@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -33,10 +32,7 @@ public class ProcessingMessages implements Runnable{
 
     @Override
     public void run() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(user.getStorageMessage()).append(messages);
-
-        String msg = sb.toString().trim();
+        String msg = (user.getStorageMessage() + messages).trim();
         String[] s = msg.split("&");
 
         if (s[0].equals("start") & s[s.length - 1].equals("end")) {
@@ -368,21 +364,14 @@ public class ProcessingMessages implements Runnable{
      * Implementing a request disconnect client
      */
     private void breakConnect() {
-        try {
-            serializeData("disconnect");
-
-            while (portListener.getMessageForSend().get(socketChanel) != null) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        User user = portListener.getSocketUsers().remove(socketChanel);
+        serializeData("disconnect");
+        while (portListener.getMessageForSend().get(socketChanel) != null) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            portListener.getSocketUser().remove(socketChanel);
-            socketChanel.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
