@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +20,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
- *
+ * Set connection with server
  */
 public class ClientConnect implements Runnable{
     private static ClientConnect instance;
@@ -34,7 +33,6 @@ public class ClientConnect implements Runnable{
     private static final int BUFFER_SIZE = 1460;
 
     private Selector selector;
-    private SelectionKey key;
     private SocketChannel channel;
     private SocketAddress serverAddress;
     private Thread downloadFileThread = null;
@@ -55,11 +53,9 @@ public class ClientConnect implements Runnable{
             selector = Selector.open();
             channel = SocketChannel.open();
             channel.configureBlocking(false);
-            key= channel.register(selector, SelectionKey.OP_CONNECT, ByteBuffer.allocate(BUFFER_SIZE));
+            channel.register(selector, SelectionKey.OP_CONNECT, ByteBuffer.allocate(BUFFER_SIZE));
             channel.connect(new InetSocketAddress(IP_ADDRESS, PORT));
             serverAddress = channel.getRemoteAddress();
-        } catch (ClosedChannelException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,7 +69,7 @@ public class ClientConnect implements Runnable{
                 if (breakClientConnect) {
                     channel.close();
                     selector.close();
-                    logger.info("break");
+                    logger.info("break client");
                     break;
                 }
                 if (selector.isOpen()) {
@@ -88,7 +84,7 @@ public class ClientConnect implements Runnable{
                         if (key.isWritable() && !queue.isEmpty()) {
                             String line = queue.poll();
                             if (line != null && line.equals("download")) {
-                                downloadFile(key);
+                                downloadFile();
                                 continue;
                             }
                             if (line != null) {
@@ -139,21 +135,12 @@ public class ClientConnect implements Runnable{
         logger.info("the start reading data from the channel: " + serverAddress);
         ByteBuffer buf = (ByteBuffer) key.attachment();
         try {
-//            int bytesRead = channel.read(buf);
             List<Byte> list = new ArrayList<>();
-
-//            if (bytesRead < 0 || bytesRead == 0) {
-//                return;
-//            }
-
             while (channel.read(buf) > 0) {
                 buf.flip();
                 for (int i = 0; i < buf.limit(); i++) {
                     list.add(buf.get(i));
                 }
-//                while (buf.hasRemaining()) {
-//                    list.add(buf.get());
-//                }
                 buf.clear();
             }
 
@@ -171,8 +158,8 @@ public class ClientConnect implements Runnable{
 
     /**
      * Reading file data from server
-     * @param pathFile -
-     * @param fileInfo -
+     * @param pathFile - A path to a file
+     * @param fileInfo - Instance of FileInfo class a file
      */
     private void readFile(Path pathFile, FileInfo fileInfo) {
         logger.info("start download file");
@@ -194,8 +181,6 @@ public class ClientConnect implements Runnable{
                 }
             }
             clientController.updateFileTable(pathFile.getParent());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,10 +204,6 @@ public class ClientConnect implements Runnable{
             while (in.available() != 0) {
                 out.write(b, 0, in.read(b));
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -232,7 +213,7 @@ public class ClientConnect implements Runnable{
     /**
      *  Prepare to download file from server
      */
-    private void downloadFile(SelectionKey key) {
+    private void downloadFile() {
         try {
             String filename = serverController.getSelected();
             if (filename == null) {
@@ -242,21 +223,17 @@ public class ClientConnect implements Runnable{
             }
             for (FileInfo f: serverController.getListFile()) {
                 if (f.getFilename().equals(filename) && f.getSize() != -1L) {
-                    FileInfo fileInfo = f;
-                    Path pathFile = Paths.get(clientController.pathField.getText()).resolve(fileInfo.getFilename());
+                    Path pathFile = Paths.get(clientController.pathField.getText()).resolve(f.getFilename());
                     if (!Files.exists(pathFile)) {
-                        logger.info(fileInfo.getFilename());
-                        String command = wrapMessage("download " + fileInfo.getFilename());
+                        logger.info(f.getFilename());
+                        String command = wrapMessage("download " + f.getFilename());
 
-                        downloadFileThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Files.createFile(pathFile);
-                                    readFile(pathFile, fileInfo);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                        downloadFileThread = new Thread(() -> {
+                            try {
+                                Files.createFile(pathFile);
+                                readFile(pathFile, f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         });
                         channel.write(ByteBuffer.wrap(command.getBytes(StandardCharsets.UTF_8)));
@@ -276,8 +253,8 @@ public class ClientConnect implements Runnable{
     }
 
     /**
-     *
-     * @param command
+     * Processing command getting from server
+     * @param command - getting command
      */
     private void processingCommand(String command) {
         logger.info(command);
@@ -330,13 +307,13 @@ public class ClientConnect implements Runnable{
         if (command.equals("disconnect")) {
             logger.info("disconnect confirmed");
             breakClientConnect = true;
-            Platform.runLater(() -> Platform.exit());
+            Platform.runLater(Platform::exit);
         }
     }
 
     /**
-     *
-     * @param b
+     * Deserialization Object getting from server
+     * @param b - set of byte getting from server
      */
     private void convertData(byte[] b) {
         try {
@@ -351,16 +328,14 @@ public class ClientConnect implements Runnable{
                 logger.info("arraylist");
                 castFileInfo(ob);
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     *
-     * @param ob
+     * Casting object getting after deserialization
+     * @param ob - casting object
      */
     private void castFileInfo(Object ob) {
         List<FileInfo> fl = new ArrayList<>();
@@ -373,9 +348,12 @@ public class ClientConnect implements Runnable{
         queue.add("getPathField");
     }
 
+    /**
+     * Wrap message for server by start/end markers
+     * @param message - wrapping message
+     * @return - resulting message
+     */
     private String wrapMessage(String message) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("start&").append(message).append("&end");
-        return sb.toString();
+        return "start&" + message + "&end";
     }
 }

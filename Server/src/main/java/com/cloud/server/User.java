@@ -34,8 +34,6 @@ public class User {
         this.name = "stranger";
     }
 
-    //////////////SETTERS/////////////////////
-
     public void setReg(boolean reg) {
         isReg = reg;
     }
@@ -68,8 +66,6 @@ public class User {
     public void setSelectFileForCopy(Path selectFileForCopy) {
         this.selectFileForCopy = selectFileForCopy;
     }
-
-    //////////////GETTERS////////////////////
 
     public PortListener getPortListener() {
         return portListener;

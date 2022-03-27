@@ -143,7 +143,7 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param actionEvent
+     * @param actionEvent -
      */
     public void registration(ActionEvent actionEvent) {
         connect = ClientConnect.getInstance();
@@ -259,14 +259,14 @@ public class ServerController implements Initializable {
      */
     public void renameFile(ActionEvent actionEvent) {
         if (selected != null) {
-            selectedFileForDelete = selected;
+            selectedFileForRename = selected;
             selected = null;
 
             String rename = JOptionPane.showInputDialog("Type the new name");
             if (rename != null && !rename.equals("")) {
                 if (isNameFile(rename)) {
                     Alert alert = new Alert(Alert.AlertType.WARNING,
-                            "The file's name already exist!" , ButtonType.CANCEL);
+                            "The file's name already exist!", ButtonType.CANCEL);
                     alert.showAndWait();
                 } else {
                     connect.getQueue().add("rename ".concat(selectedFileForRename + " " +rename));
@@ -281,7 +281,7 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param actionEvent
+     * @param actionEvent -
      */
     public void copyFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -298,7 +298,7 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param actionEvent
+     * @param actionEvent -
      */
     public void pasteFile(ActionEvent actionEvent) {
         connect.getQueue().add("past");
@@ -306,7 +306,7 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param actionEvent
+     * @param actionEvent -
      */
     public void cutFile(ActionEvent actionEvent) {
         if (selected != null) {
@@ -351,8 +351,8 @@ public class ServerController implements Initializable {
 
     /**
      *
-     * @param nameFile
-     * @return
+     * @param nameFile -
+     * @return -
      */
     private boolean isNameFile(String nameFile) {
         for (FileInfo f : listFile) {

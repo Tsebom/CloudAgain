@@ -458,13 +458,13 @@ public class ProcessingMessages implements Runnable{
     private void sendMessage(byte[] bytes) {
         while (portListener.getMessageForSend().get(socketChanel) != null) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         portListener.getMessageForSend().put(socketChanel, bytes);
-
+        portListener.disturb();
     }
 
     /////////////////////////DOWNLOAD----UPLOAD////////////////////////////////
@@ -490,7 +490,7 @@ public class ProcessingMessages implements Runnable{
 
         while(downloadPort == 0) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -300,7 +300,6 @@ public class ClientController implements Initializable {
             selectedFilePathForDelete = null;
         } else {
             alertWarning("No one file was selected");
-            return;
         }
     }
 

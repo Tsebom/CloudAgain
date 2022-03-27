@@ -46,7 +46,7 @@ public class PortListener implements Runnable {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
             while (serverSocketChannel.isOpen()) {
-                selector.select(1000);
+                selector.select();
                 Set<SelectionKey> keys = selector.selectedKeys();
                 for (SelectionKey key : keys) {
                     if (key.isValid()) {
@@ -66,8 +66,8 @@ public class PortListener implements Runnable {
                             SocketChannel socketChannel = (SocketChannel) key.channel();
                             if (messageForSend.get(socketChannel) != null) {
                                 write((ByteBuffer) key.attachment(), socketChannel);
-                                key.interestOps(SelectionKey.OP_READ);
                             }
+                            key.interestOps(SelectionKey.OP_READ);
                         }
                     }
                 }
@@ -86,6 +86,10 @@ public class PortListener implements Runnable {
 
     public Map<SocketChannel, User> getSocketUser() {
         return socketUser;
+    }
+
+    public void disturb() {
+        selector.wakeup();
     }
 
     public synchronized Map<SocketChannel, byte[]> getMessageForSend() {
