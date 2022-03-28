@@ -1,7 +1,5 @@
 Server/.idea/
 Server/target/
 Client/target/
-Server/src/main/resources/serverDir
 README.md
 *.log
-*.db

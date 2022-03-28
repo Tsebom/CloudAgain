@@ -176,7 +176,6 @@ public class PortListener implements Runnable {
             }
             buf.compact();
         }
-
-        logger.info("message was sent to the client: " + socketChannel.getRemoteAddress() ) ;
+        logger.info("message was sent to the client: " + socketChannel.getRemoteAddress());
     }
 }
