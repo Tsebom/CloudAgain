@@ -1,1 +1,5 @@
 Server/.idea/
+Server/target/
+Client/target/
+README.md
+*.log
