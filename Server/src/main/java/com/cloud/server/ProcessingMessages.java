@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ProcessingMessages implements Runnable{
+    private static final byte[] STR = new byte[]{60, 83, 84, 82, 62};//<STR>
+    private static final byte[] END = new byte[]{60, 69, 78, 68, 62};//<END>
+
     private final PortListener portListener;
     private final SocketChannel socketChanel;
 
@@ -357,7 +360,6 @@ public class ProcessingMessages implements Runnable{
      */
     private Path truncationPath(Path path, Path source) {
         return  path.subpath(source.getNameCount(), path.getNameCount());
-
     }
 
     /**
@@ -419,13 +421,15 @@ public class ProcessingMessages implements Runnable{
      */
     private void serializeData(Object ob) {
         logger.info("start serial");
-        ByteArrayOutputStream baos = null;
+        ByteArrayOutputStream baos;
         ObjectOutputStream oos;
         try {
             baos = new ByteArrayOutputStream();
+            baos.write(STR);
             oos = new ObjectOutputStream(baos);
             oos.writeObject(ob);
             oos.flush();
+            baos.write(END);
             sendMessage(baos.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
@@ -449,7 +453,7 @@ public class ProcessingMessages implements Runnable{
         portListener.disturb();
     }
 
-    /////////////////////////DOWNLOAD----UPLOAD////////////////////////////////
+    /////////////////////////DOWNLOAD----UPLOAD//////////////////////////////
 
     /**
      * This method prepared server for sending the file to the client

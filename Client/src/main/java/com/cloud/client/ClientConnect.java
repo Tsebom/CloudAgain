@@ -32,6 +32,26 @@ public class ClientConnect implements Runnable{
     private static final String IP_ADDRESS = "localhost";
     private static final int BUFFER_SIZE = 1460;
 
+//    private static final byte[] STR = new byte[]{60, 83, 84, 82, 62};//<STR>
+//    private static final byte[] END = new byte[]{60, 69, 78, 68, 62};//<END>
+    private List<Byte> messageStorage;
+
+    private static final List<Byte> STR = new ArrayList<>();
+    private static final List<Byte> END = new ArrayList<>();
+    static {
+        STR.add((byte) 60);
+        STR.add((byte) 83);
+        STR.add((byte) 84);
+        STR.add((byte) 82);
+        STR.add((byte) 62);
+
+        END.add((byte) 60);
+        END.add((byte) 69);
+        END.add((byte) 78);
+        END.add((byte) 68);
+        END.add((byte) 62);
+    }
+
     private Selector selector;
     private SocketChannel channel;
     private SocketAddress serverAddress;
@@ -144,12 +164,43 @@ public class ClientConnect implements Runnable{
                 buf.clear();
             }
 
-            byte[] b = new byte[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                b[i] = list.get(i);
+            if (list.size() > 4) {
+                logger.info(list.toString());
+                List<Byte> endSubList = list.subList(list.size()-5, list.size()-1);
+                logger.info(endSubList.toString());
+                endSubList.add(list.get(list.size()-1));
+                logger.info(endSubList.toString());
+
+                if (endSubList.equals(END)) {
+                    logger.info("END");
+                    if (messageStorage == null) {
+                        messageStorage = list;
+                    } else {
+                        messageStorage.addAll(list);
+                    }
+
+                    messageStorage.removeAll(messageStorage.subList(0, 5));
+                    logger.info(messageStorage.toString());
+                    messageStorage.removeAll(messageStorage.subList(messageStorage.size()-5, messageStorage.size()-1));
+                    logger.info(messageStorage.toString());
+                    messageStorage.remove(messageStorage.size()-1);
+                    logger.info(messageStorage.toString());
+
+                    byte[] b = new byte[messageStorage.size()];
+                    for (int i = 0; i < messageStorage.size(); i++) {
+                        b[i] = messageStorage.get(i);
+                    }
+                    messageStorage = null;
+                    convertData(b);
+                } else if (list.subList(0, 5).equals(STR)) {
+                    messageStorage = list;
+                }
+            } else if (messageStorage != null) {
+                messageStorage.addAll(list);
+            } else {
+                messageStorage = list;
             }
 
-            convertData(b);
             logger.info("the end read data from the channel: " + serverAddress);
         } catch (IOException e) {
             e.printStackTrace();
