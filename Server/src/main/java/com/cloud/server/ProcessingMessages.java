@@ -1,6 +1,9 @@
 package com.cloud.server;
 
+import sun.security.util.ArrayUtil;
+
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
@@ -14,7 +17,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ProcessingMessages implements Runnable{
-    private static final byte[] STR = new byte[]{60, 83, 84, 82, 62};//<STR>
     private static final byte[] END = new byte[]{60, 69, 78, 68, 62};//<END>
 
     private final PortListener portListener;
@@ -425,11 +427,11 @@ public class ProcessingMessages implements Runnable{
         ObjectOutputStream oos;
         try {
             baos = new ByteArrayOutputStream();
-            baos.write(STR);
             oos = new ObjectOutputStream(baos);
             oos.writeObject(ob);
             oos.flush();
             baos.write(END);
+            logger.info(baos.toString());
             sendMessage(baos.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();

@@ -32,19 +32,11 @@ public class ClientConnect implements Runnable{
     private static final String IP_ADDRESS = "localhost";
     private static final int BUFFER_SIZE = 1460;
 
-//    private static final byte[] STR = new byte[]{60, 83, 84, 82, 62};//<STR>
-//    private static final byte[] END = new byte[]{60, 69, 78, 68, 62};//<END>
     private List<Byte> messageStorage;
 
-    private static final List<Byte> STR = new ArrayList<>();
     private static final List<Byte> END = new ArrayList<>();
-    static {
-        STR.add((byte) 60);
-        STR.add((byte) 83);
-        STR.add((byte) 84);
-        STR.add((byte) 82);
-        STR.add((byte) 62);
 
+    static {
         END.add((byte) 60);
         END.add((byte) 69);
         END.add((byte) 78);
@@ -166,10 +158,11 @@ public class ClientConnect implements Runnable{
 
             if (list.size() > 4) {
                 logger.info(list.toString());
-                List<Byte> endSubList = list.subList(list.size()-5, list.size()-1);
-                logger.info(endSubList.toString());
-                endSubList.add(list.get(list.size()-1));
-                logger.info(endSubList.toString());
+                List<Byte> endSubList = new ArrayList<>();
+
+                for (int i = list.size()-5; i < list.size(); i++) {
+                    endSubList.add(list.get(i));
+                }
 
                 if (endSubList.equals(END)) {
                     logger.info("END");
@@ -179,20 +172,15 @@ public class ClientConnect implements Runnable{
                         messageStorage.addAll(list);
                     }
 
-                    messageStorage.removeAll(messageStorage.subList(0, 5));
-                    logger.info(messageStorage.toString());
-                    messageStorage.removeAll(messageStorage.subList(messageStorage.size()-5, messageStorage.size()-1));
-                    logger.info(messageStorage.toString());
-                    messageStorage.remove(messageStorage.size()-1);
-                    logger.info(messageStorage.toString());
-
-                    byte[] b = new byte[messageStorage.size()];
-                    for (int i = 0; i < messageStorage.size(); i++) {
+                    byte[] b = new byte[messageStorage.size() - 5];
+                    for (int i = 0; i < messageStorage.size() - 5; i++) {
                         b[i] = messageStorage.get(i);
                     }
                     messageStorage = null;
                     convertData(b);
-                } else if (list.subList(0, 5).equals(STR)) {
+                } else if (messageStorage != null) {
+                    messageStorage.addAll(list);
+                } else {
                     messageStorage = list;
                 }
             } else if (messageStorage != null) {
@@ -367,6 +355,7 @@ public class ClientConnect implements Runnable{
      * @param b - set of byte getting from server
      */
     private void convertData(byte[] b) {
+        logger.info(b.toString());
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(b);
             ObjectInputStream ois = new ObjectInputStream(bais);
