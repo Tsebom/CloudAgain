@@ -1,5 +1,6 @@
 package com.cloud.server;
 
+import com.google.common.hash.Hashing;
 import sun.security.util.ArrayUtil;
 
 import java.io.*;
@@ -7,6 +8,7 @@ import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -381,8 +383,9 @@ public class ProcessingMessages implements Runnable{
         String[] token = command.split(" ");
 
         DataBaseConnect dataBaseConnect = DataBaseConnect.getDataBaseConnection();
+        String sha256hex = Hashing.sha256().hashString(token[2], StandardCharsets.UTF_8).toString();
 
-        if (dataBaseConnect.getDataBaseAuthService().isRegistration(token[1], token[2])) {
+        if (dataBaseConnect.getDataBaseAuthService().isRegistration(token[1], sha256hex)) {
             user.setName(token[1]);
             user.setReg(true);
             user.setAuth(true);
@@ -402,11 +405,12 @@ public class ProcessingMessages implements Runnable{
         String[] token = command.split(" ");
 
         DataBaseConnect dataBaseConnect = DataBaseConnect.getDataBaseConnection();
+        String sha256hex = Hashing.sha256().hashString(token[2], StandardCharsets.UTF_8).toString();
 
-        if (dataBaseConnect.getDataBaseAuthService().isRegistration(token[1], token[2])) {
+        if (dataBaseConnect.getDataBaseAuthService().isRegistration(token[1], sha256hex)) {
             serializeData("alert_fail_reg This user already exist");
         } else {
-            dataBaseConnect.getDataBaseAuthService().setRegistration(token[1], token[2]);
+            dataBaseConnect.getDataBaseAuthService().setRegistration(token[1], sha256hex);
             user.setName(token[1]);
             Files.createDirectory(user.getRoot().resolve(token[1]));
             user.setReg(true);

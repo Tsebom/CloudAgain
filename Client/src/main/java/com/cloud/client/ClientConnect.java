@@ -35,7 +35,6 @@ public class ClientConnect implements Runnable{
     private List<Byte> messageStorage;
 
     private static final List<Byte> END = new ArrayList<>();
-
     static {
         END.add((byte) 60);
         END.add((byte) 69);

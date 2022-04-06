@@ -1,6 +1,7 @@
 package com.cloud.client;
 
 import com.cloud.server.FileInfo;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -157,12 +158,13 @@ public class ServerController implements Initializable {
         connect = ClientConnect.getInstance();
         connect.setNameUser(loginField.getText());
         connect.setServerController(this);
+
         connect.getQueue().add("auth ".concat(loginField.getText().trim() + " ")
                 .concat(passwordField.getText().trim()));
     }
 
     /**
-     *  Set title for window
+     * Set title for window
      * @param title - title
      */
     public void setTitle(String title) {
@@ -172,7 +174,7 @@ public class ServerController implements Initializable {
     }
 
     /**
-     *  Display list file from server
+     * Display list file from server
      * @param list - list of file
      */
     public void updateFileTable(List<FileInfo> list) {
